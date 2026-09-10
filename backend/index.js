@@ -192,6 +192,62 @@ function requireAdmin(req, res, next) {
 
 app.use(authenticateToken);
 
+// --- Root / Welcome Route ---
+app.get('/', (req, res) => {
+  const dbStatus = isMongo() ? 'MongoDB Atlas Connected' : 'In-Memory Store (Add MONGO_URI in Vercel settings to connect Atlas)';
+  if (req.accepts('html')) {
+    return res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Vault Breaker API // Online</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #0f172a; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+          .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; max-width: 540px; width: 100%; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+          .status { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; color: #16a34a; background: #dcfce7; padding: 4px 12px; border-radius: 999px; margin-bottom: 16px; }
+          .status-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; }
+          h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px; color: #0f172a; }
+          p { color: #64748b; font-size: 14px; line-height: 1.6; margin: 0 0 20px; }
+          .meta { background: #f1f5f9; border-radius: 8px; padding: 14px 16px; font-family: monospace; font-size: 12px; margin-bottom: 20px; }
+          .endpoints { display: flex; flex-direction: column; gap: 8px; }
+          .endpoints a { display: flex; justify-content: space-between; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #2563eb; font-weight: 600; font-size: 13px; }
+          .endpoints a:hover { background: #eff6ff; border-color: #bfdbfe; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="status"><span class="status-dot"></span> API ONLINE & RUNNING</div>
+          <h1>Vault Breaker Backend</h1>
+          <p>The cybersecurity escape room game API is live on Vercel. Connect your frontend or explore the endpoints below.</p>
+          <div class="meta">
+            <div><strong>Database:</strong> ${dbStatus}</div>
+            <div><strong>Timestamp:</strong> ${new Date().toISOString()}</div>
+          </div>
+          <div class="endpoints">
+            <a href="/api/health" target="_blank"><span>Health Check Endpoint</span><span>/api/health →</span></a>
+            <a href="/api/runs" target="_blank"><span>Leaderboard High Scores</span><span>/api/runs →</span></a>
+            <a href="/api/admin/overview" target="_blank"><span>Admin Overview</span><span>/api/admin/overview →</span></a>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+  res.json({
+    status: 'online',
+    system: 'Vault Breaker Security Core',
+    database: dbStatus,
+    endpoints: {
+      health: '/api/health',
+      runs: '/api/runs',
+      authLogin: '/api/auth/login',
+      authRegister: '/api/auth/register'
+    }
+  });
+});
+
 // --- Health / Status ---
 app.get('/api/health', (req, res) => {
   res.json({
@@ -736,10 +792,12 @@ app.get('/api/admin/audit-logs', requireAdmin, async (req, res) => {
 // Serve dist in production
 app.use(express.static('dist'));
 
-app.listen(port, () => {
-  console.log(`[VAULT BREAKER CORE] API active at http://localhost:${port}`);
-  seedDefaultAdmin();
-});
+if (!process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`[VAULT BREAKER CORE] API active at http://localhost:${port}`);
+    seedDefaultAdmin();
+  });
+}
 
 const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/vault_breaker';
 mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 6000 })
@@ -749,3 +807,5 @@ mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 6000 })
     seedDefaultAdmin();
   })
   .catch((error) => console.log('ℹ Notice: MongoDB Atlas (' + error.message + '). Seamlessly using built-in in-memory fallback store.'));
+
+export default app;

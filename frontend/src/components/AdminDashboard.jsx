@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { cases as defaultCases } from '../data/cases';
+import { API_BASE } from '../config';
 
 export default function AdminDashboard({ onBackToGame }) {
   const { user, token } = useAuth();
@@ -72,7 +73,7 @@ export default function AdminDashboard({ onBackToGame }) {
         const headers = { Authorization: `Bearer ${token}` };
 
         // 1. Overview
-        const resOverview = await fetch('/api/admin/overview', { headers });
+        const resOverview = await fetch(`${API_BASE}/api/admin/overview`, { headers });
         if (resOverview.ok) {
           const data = await resOverview.json();
           if (isMounted) {
@@ -84,28 +85,28 @@ export default function AdminDashboard({ onBackToGame }) {
         }
 
         // 2. Users
-        const resUsers = await fetch('/api/admin/users', { headers });
+        const resUsers = await fetch(`${API_BASE}/api/admin/users`, { headers });
         if (resUsers.ok) {
           const data = await resUsers.json();
           if (isMounted) setUsers(data.users || []);
         }
 
         // 3. Runs
-        const resRuns = await fetch('/api/admin/runs', { headers });
+        const resRuns = await fetch(`${API_BASE}/api/admin/runs`, { headers });
         if (resRuns.ok) {
           const data = await resRuns.json();
           if (isMounted) setRuns(data.runs || []);
         }
 
         // 4. Scenarios
-        const resScenarios = await fetch('/api/admin/scenarios', { headers });
+        const resScenarios = await fetch(`${API_BASE}/api/admin/scenarios`, { headers });
         if (resScenarios.ok) {
           const data = await resScenarios.json();
           if (isMounted) setCustomScenarios(data.scenarios || []);
         }
 
         // 5. Audit Logs
-        const resLogs = await fetch('/api/admin/audit-logs', { headers });
+        const resLogs = await fetch(`${API_BASE}/api/admin/audit-logs`, { headers });
         if (resLogs.ok) {
           const data = await resLogs.json();
           if (isMounted) setAuditLogs(data.logs || []);
@@ -126,7 +127,7 @@ export default function AdminDashboard({ onBackToGame }) {
   const handleToggleUserRole = async (userId, currentRole) => {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     try {
-      const res = await fetch(`/api/admin/users/${userId}/role`, {
+      const res = await fetch(`${API_BASE}/api/admin/users/${userId}/role`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +149,7 @@ export default function AdminDashboard({ onBackToGame }) {
   const handleDeleteUser = async (userId, username) => {
     if (!window.confirm(`Permanently remove user "${username}"?`)) return;
     try {
-      const res = await fetch(`/api/admin/users/${userId}`, {
+      const res = await fetch(`${API_BASE}/api/admin/users/${userId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -166,7 +167,7 @@ export default function AdminDashboard({ onBackToGame }) {
   const handleAddUserSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/admin/users', {
+      const res = await fetch(`${API_BASE}/api/admin/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -192,7 +193,7 @@ export default function AdminDashboard({ onBackToGame }) {
   const handleDeleteRun = async (runId) => {
     if (!window.confirm('Delete this game record from high scores?')) return;
     try {
-      const res = await fetch(`/api/admin/runs/${runId}`, {
+      const res = await fetch(`${API_BASE}/api/admin/runs/${runId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -254,7 +255,7 @@ export default function AdminDashboard({ onBackToGame }) {
         }
       };
 
-      const res = await fetch('/api/admin/scenarios', {
+      const res = await fetch(`${API_BASE}/api/admin/scenarios`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -278,7 +279,7 @@ export default function AdminDashboard({ onBackToGame }) {
   const handleDeleteScenario = async (scenarioId) => {
     if (!window.confirm('Delete this custom question?')) return;
     try {
-      const res = await fetch(`/api/admin/scenarios/${scenarioId}`, {
+      const res = await fetch(`${API_BASE}/api/admin/scenarios/${scenarioId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -296,7 +297,7 @@ export default function AdminDashboard({ onBackToGame }) {
     e.preventDefault();
     setSettingsStatus('Saving...');
     try {
-      const res = await fetch('/api/admin/settings', {
+      const res = await fetch(`${API_BASE}/api/admin/settings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

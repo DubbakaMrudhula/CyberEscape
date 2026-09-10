@@ -38,6 +38,22 @@ const JWT_SECRET = process.env.JWT_SECRET || 'vault-breaker-super-secret-key-202
 app.use(cors());
 app.use(express.json());
 
+// Normalize URL in case a serverless router rewrote path to /index.js
+app.use((req, res, next) => {
+  if (req.url === '/index.js' || req.url.startsWith('/index.js?')) {
+    const rawPath = req.headers['x-matched-path'] || req.headers['x-vercel-sc-path'] || req.headers['x-forwarded-uri'];
+    if (rawPath && rawPath !== '/index.js') {
+      req.url = rawPath;
+    } else {
+      req.url = '/';
+    }
+  }
+  next();
+});
+
+// Favicon handler
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // --- In-Memory Fallback Stores (if MongoDB isn't running) ---
 const memUsers = [];
 const memRuns = [];
@@ -330,9 +346,10 @@ app.post('/api/auth/register', async (req, res) => {
 // 2. Login
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { identifier, password } = req.body;
+    const identifier = req.body.identifier || req.body.email || req.body.username;
+    const { password } = req.body;
     if (!identifier || !password) {
-      return res.status(400).json({ message: 'Identifier and password are required.' });
+      return res.status(400).json({ message: 'Username/Email and password are required.' });
     }
 
     let user;

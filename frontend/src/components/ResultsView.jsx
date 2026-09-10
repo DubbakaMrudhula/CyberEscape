@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { sounds } from '../utils/sound';
+import { API_BASE } from '../config';
 
 export default function ResultsView({ score, lives, mistakes, challenges, onRestart, onOpenAuth }) {
   const { user } = useAuth();
@@ -34,7 +35,7 @@ export default function ResultsView({ score, lives, mistakes, challenges, onRest
     sounds.playClick();
 
     try {
-      const res = await fetch('/api/runs', {
+      const res = await fetch(`${API_BASE}/api/runs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

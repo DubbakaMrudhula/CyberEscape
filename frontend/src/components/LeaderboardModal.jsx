@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE } from '../config';
 
 export default function LeaderboardModal({ isOpen, onClose }) {
   const [runs, setRuns] = useState([]);
@@ -7,7 +8,7 @@ export default function LeaderboardModal({ isOpen, onClose }) {
   useEffect(() => {
     if (!isOpen) return;
     setLoading(true);
-    fetch('/api/runs')
+    fetch(`${API_BASE}/api/runs`)
       .then(res => res.json())
       .then(data => {
         setRuns(data.runs || []);

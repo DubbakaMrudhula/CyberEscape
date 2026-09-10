@@ -24,6 +24,7 @@ import QRArtifact from './components/artifacts/QRArtifact';
 import SMSArtifact from './components/artifacts/SMSArtifact';
 
 import './style.css';
+import { API_BASE } from './config';
 
 function EscapeRoomApp() {
   const { user, isAdmin } = useAuth();
@@ -46,13 +47,13 @@ function EscapeRoomApp() {
   useEffect(() => {
     async function loadEngineData() {
       try {
-        const resSettings = await fetch('/api/admin/settings');
+        const resSettings = await fetch(`${API_BASE}/api/admin/settings`);
         if (resSettings.ok) {
           const data = await resSettings.json();
           if (data.settings) setEngineSettings(data.settings);
         }
 
-        const resScenarios = await fetch('/api/admin/scenarios');
+        const resScenarios = await fetch(`${API_BASE}/api/admin/scenarios`);
         if (resScenarios.ok) {
           const data = await resScenarios.json();
           if (data.scenarios) setCustomScenarios(data.scenarios);

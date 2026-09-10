@@ -184,6 +184,9 @@ async function seedDefaultAdmin() {
   }
 }
 
+// Seed default accounts immediately on boot for serverless & local environments
+seedDefaultAdmin();
+
 // --- Auth Middleware ---
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -816,7 +819,7 @@ if (!process.env.VERCEL) {
   });
 }
 
-const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/vault_breaker';
+const mongoUri = process.env.MONGO_URI || 'mongodb+srv://mrudhu2306_db_user:mrudhula@cluster0.4kspcxl.mongodb.net/vault_breaker?retryWrites=true&w=majority';
 mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 6000 })
   .then(() => {
     const maskedUri = mongoUri.replace(/\/\/.*@/, '//<credentials>@');
